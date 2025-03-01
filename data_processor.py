@@ -5,16 +5,18 @@ from datetime import datetime, timedelta
 class MarketDataProcessor:
     def __init__(self):
         self.indices = {
-            'Nifty 50': '^NSEI',
-            'Nifty Bank': '^NSEBANK',
-            'FinNifty': 'FINNIFTY.NS',
-            'BSE Sensex': '^BSESN',
-            'Nifty Midcap Select': 'NIFTY_MIDCAP_SELECT.NS',
-            'BSE Bankex': '^BANKEX',
-            'India VIX': '^INDIAVIX',
-            'Nifty Total Market': 'NIFTY_TOTAL_MARKET.NS',
-            'Nifty Next 50': 'NIFTY_NEXT_50.NS',
-            'Nifty 100': 'NIFTY_100.NS'
+            'NIFTY 50': '^NSEI',
+            'NIFTY BANK': '^NSEBANK',
+            'NIFTY MIDCAP 100': '^CNXMC',
+            'NIFTY NEXT 50': '^NFTY',
+            'NIFTY 100': '^CNX100',
+            'NIFTY 200': '^CNX200',
+            'NIFTY 500': '^CRSLDX',
+            'NIFTY SMALLCAP 100': '^CNXSC',
+            'NIFTY MIDCAP 50': '^NIFMDCP50',
+            'NIFTY SMALLCAP 50': '^NIFSMCP50',
+            'BSE SENSEX': '^BSESN',
+            'INDIA VIX': '^INDIAVIX'
         }
 
     def load_data(self):
@@ -38,10 +40,7 @@ class MarketDataProcessor:
                     'PREV. CLOSE': prev_close,
                     'PREV. DAY': hist.iloc[-2]['Close'] if len(hist) > 1 else 0,
                     '1W AGO': hist.iloc[-6]['Close'] if len(hist) > 5 else 0,
-                    '1M AGO': hist.iloc[-22]['Close'] if len(hist) > 21 else 0,
-                    '1Y AGO': hist.iloc[-252]['Close'] if len(hist) > 251 else 0,
-                    '52W H': hist['High'].max(),
-                    '52W L': hist['Low'].min()
+                    '1M AGO': hist.iloc[-22]['Close'] if len(hist) > 21 else 0
                 })
             except Exception as e:
                 print(f"Error fetching data for {name}: {e}")
