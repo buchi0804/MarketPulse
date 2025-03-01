@@ -16,37 +16,33 @@ def format_large_number(number):
         return f"{number/1000:.2f}K"
     return f"{number:.2f}"
 
-def create_price_chart(index_name, current_price, high, low, prev_close):
+def create_price_chart(index_name, current_price, prev_close):
+    # Calculate percentage change
+    pct_change = ((float(current_price) - float(prev_close)) / float(prev_close)) * 100 if prev_close else 0
+
+    # Create a simple card-like display
     fig = go.Figure()
-    
-    # Add price line
+
+    # Add price and change indicators
     fig.add_trace(go.Indicator(
-        mode = "number+delta",
-        value = float(current_price),
-        delta = {"reference": float(prev_close), "relative": True},
-        title = {"text": index_name},
-        domain = {'x': [0, 1], 'y': [0, 1]}
+        mode="number+delta",
+        value=float(current_price),
+        delta={"reference": float(prev_close), 
+               "relative": True,
+               "valueformat": ".2%"},
+        title={"text": index_name},
+        number={"valueformat": ".2f"},
+        domain={'y': [0, 1], 'x': [0, 1]}
     ))
-    
-    # Add range slider for high/low
-    fig.add_trace(go.Indicator(
-        mode = "number+gauge",
-        value = float(current_price),
-        gauge = {
-            'axis': {'range': [float(low), float(high)]},
-            'bar': {'color': "darkblue"},
-            'steps': [
-                {'range': [float(low), float(high)], 'color': "lightgray"}
-            ],
-        },
-        domain = {'x': [0.1, 0.9], 'y': [0, 0.3]}
-    ))
-    
+
+    # Update layout for a cleaner look
     fig.update_layout(
-        height=300,
-        margin=dict(l=10, r=10, t=60, b=10)
+        height=150,  # Reduced height
+        margin=dict(l=10, r=10, t=30, b=10),  # Reduced margins
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)'
     )
-    
+
     return fig
 
 def get_color(value):
