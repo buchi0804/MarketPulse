@@ -7,9 +7,14 @@ class MarketDataProcessor:
         self.indices = {
             'Nifty 50': '^NSEI',
             'Nifty Bank': '^NSEBANK',
-            'Nifty IT': '^CNXIT',
-            'Nifty Auto': '^CNXAUTO',
-            'Nifty Pharma': '^CNXPHARMA'
+            'FinNifty': 'FINNIFTY.NS',
+            'BSE Sensex': '^BSESN',
+            'Nifty Midcap Select': 'NIFTY_MIDCAP_SELECT.NS',
+            'BSE Bankex': '^BANKEX',
+            'India VIX': '^INDIAVIX',
+            'Nifty Total Market': 'NIFTY_TOTAL_MARKET.NS',
+            'Nifty Next 50': 'NIFTY_NEXT_50.NS',
+            'Nifty 100': 'NIFTY_100.NS'
         }
 
     def load_data(self):
