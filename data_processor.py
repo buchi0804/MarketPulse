@@ -1,28 +1,48 @@
+import yfinance as yf
 import pandas as pd
-from datetime import datetime
+from datetime import datetime, timedelta
 
 class MarketDataProcessor:
-    def __init__(self, csv_path):
-        self.csv_path = csv_path
-        
+    def __init__(self):
+        self.indices = {
+            'Nifty 50': '^NSEI',
+            'Nifty Bank': '^NSEBANK',
+            'Nifty IT': '^CNXIT',
+            'Nifty Auto': '^CNXAUTO',
+            'Nifty Pharma': '^CNXPHARMA'
+        }
+
     def load_data(self):
-        df = pd.read_csv(self.csv_path)
-        
-        # Clean column names
-        df.columns = [col.strip().replace('"', '').replace('\n', ' ').strip() for col in df.columns]
-        
-        # Clean data values
-        for col in df.columns:
-            if df[col].dtype == object:
-                df[col] = df[col].str.replace('"', '').str.strip()
-        
-        # Convert numeric columns
-        numeric_cols = ['CURRENT', '%CHNG', 'OPEN', 'HIGH', 'LOW', 'PREV. CLOSE']
-        for col in numeric_cols:
-            df[col] = pd.to_numeric(df[col], errors='coerce')
-            
-        return df
-    
+        data = []
+        for name, symbol in self.indices.items():
+            try:
+                ticker = yf.Ticker(symbol)
+                info = ticker.info
+                hist = ticker.history(period='1y')
+
+                current_price = info.get('regularMarketPrice', 0)
+                prev_close = info.get('previousClose', 0)
+
+                data.append({
+                    'INDEX': name,
+                    'CURRENT': current_price,
+                    '%CHNG': ((current_price - prev_close) / prev_close * 100) if prev_close else 0,
+                    'OPEN': info.get('regularMarketOpen', 0),
+                    'HIGH': info.get('dayHigh', 0),
+                    'LOW': info.get('dayLow', 0),
+                    'PREV. CLOSE': prev_close,
+                    'PREV. DAY': hist.iloc[-2]['Close'] if len(hist) > 1 else 0,
+                    '1W AGO': hist.iloc[-6]['Close'] if len(hist) > 5 else 0,
+                    '1M AGO': hist.iloc[-22]['Close'] if len(hist) > 21 else 0,
+                    '1Y AGO': hist.iloc[-252]['Close'] if len(hist) > 251 else 0,
+                    '52W H': hist['High'].max(),
+                    '52W L': hist['Low'].min()
+                })
+            except Exception as e:
+                print(f"Error fetching data for {name}: {e}")
+
+        return pd.DataFrame(data)
+
     def get_summary_stats(self, df):
         return {
             'total_indices': len(df),

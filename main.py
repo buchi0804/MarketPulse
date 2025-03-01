@@ -8,28 +8,28 @@ from utils import format_large_number, create_price_chart, get_color
 
 # Page config
 st.set_page_config(
-    page_title="Market Indices Tracker",
+    page_title="Market Indices Real-Time Tracker",
     page_icon="📈",
     layout="wide"
 )
 
 # Initialize data processor
-data_processor = MarketDataProcessor("attached_assets/MW-All-Indices-01-Mar-2025.csv")
+data_processor = MarketDataProcessor()
 
 def main():
     # Header
     st.title("📈 Market Indices Real-Time Tracker")
-    
+
     # Auto-refresh
-    refresh_interval = st.sidebar.slider("Auto-refresh interval (seconds)", 30, 300, 60)
-    
+    refresh_interval = st.sidebar.slider("Auto-refresh interval (seconds)", 5, 60, 10)
+
     # Load data
     df = data_processor.load_data()
     stats = data_processor.get_summary_stats(df)
-    
+
     # Market Summary
     col1, col2, col3, col4 = st.columns(4)
-    
+
     with col1:
         st.metric("Total Indices", stats['total_indices'])
     with col2:
@@ -38,25 +38,21 @@ def main():
         st.metric("Declining", stats['negative_change'], "🔴")
     with col4:
         st.metric("Last Updated", datetime.now().strftime("%H:%M:%S"))
-    
+
     # Top Gainers/Losers
     st.subheader("Top Performers")
     col1, col2 = st.columns(2)
-    
+
     with col1:
         st.success(f"Top Gainer: {stats['top_gainer']} ({stats['top_gainer_change']:.2f}%)")
     with col2:
         st.error(f"Top Loser: {stats['top_loser']} ({stats['top_loser_change']:.2f}%)")
-    
-    # Main indices table
+
+    # Major indices charts
     st.subheader("Major Market Indices")
-    
-    # Filter major indices
-    major_indices = ['NIFTY 50', 'NIFTY BANK', 'NIFTY IT', 'NIFTY AUTO', 'NIFTY PHARMA']
-    major_df = df[df['INDEX'].isin(major_indices)]
-    
-    # Create charts for major indices
-    for index, row in major_df.iterrows():
+
+    # Create charts for all indices
+    for index, row in df.iterrows():
         col1, col2 = st.columns([2, 1])
         with col1:
             fig = create_price_chart(
@@ -73,20 +69,22 @@ def main():
                 f"{row['CURRENT']:,.2f}",
                 f"{row['%CHNG']:+.2f}%"
             )
-    
+
     # All indices table
-    st.subheader("All Market Indices")
-    
+    st.subheader("Historical Data")
+
     # Format DataFrame for display
-    display_df = df[['INDEX', 'CURRENT', '%CHNG', 'OPEN', 'HIGH', 'LOW', 'PREV. CLOSE']]
-    
+    display_cols = ['INDEX', 'CURRENT', '%CHNG', 'OPEN', 'HIGH', 'LOW', 'PREV. CLOSE', 
+                   'PREV. DAY', '1W AGO', '1M AGO', '1Y AGO', '52W H', '52W L']
+    display_df = df[display_cols]
+
     # Style the dataframe
-    styled_df = display_df.style.applymap(get_color, subset=['%CHNG'])
+    styled_df = display_df.style.map(get_color, subset=['%CHNG'])
     st.dataframe(styled_df, height=400)
-    
+
     # Auto-refresh
     time.sleep(refresh_interval)
-    st.experimental_rerun()
+    st.rerun()
 
 if __name__ == "__main__":
     main()
